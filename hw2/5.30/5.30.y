@@ -1,6 +1,20 @@
 %{
 #include "stdio.h"
 #include "ctype.h"
+#include <string>
+using namespace std;
+extern "C"
+{
+	int yylex(void);
+	int yyerror(char *s);
+}
+class Value
+{
+public:
+	double val;
+	string type;
+};
+#define YYSTYPE Value
 %}
 
 %token NUMBER
@@ -8,38 +22,44 @@
 %%
 
 command:
-	exp { printf("%d\n", $1); }
+	exp { printf("%lf\n", $1.val); }
 	;
 
 exp:
-	exp '+' term { $$ = $1 + $3; } |
-	exp '-' term {$$ = $1 - $3; } |
-	term { $$ = $1; }
+	exp '+' term { $$.val = $1.val + $3.val; } |
+	exp '-' term {$$.val = $1.val - $3.val; } |
+	term { $$.val = $1.val; }
 
 term:
-	term '*' factor { $$ = $1 * $3; } |
-	factor { $$ = $1; }
+	term '*' factor { $$.val = $1.val * $3.val; } |
+	factor { $$.val = $1.val; }
 
 factor:
-	NUMBER { $$ = $1; } |
-	'(' exp ')' { $$ = $2; }
+	NUMBER { $$.val = $1.val; } |
+	'(' exp ')' { $$.val = $2.val; }
 	;
 %%
 
-main()
+int main()
 {
 	return yyparse();
 }
 
 int yylex(void)
 {
+	const double delta = 1e-5;
+	int isInt (double a);
 	int c;
 	while((c = getchar()) == ' ');
 	// eliminate blanks
 	if (isdigit(c))
 	{
 		ungetc(c, stdin);
-		scanf("%d", &yylval);
+		scanf("%lf", &yylval.val);
+		if (yylval.val - (int) yylval.val < delta )
+			yylval.type = "int";
+		else
+			yylval.type = "float";
 		return (NUMBER);
 	}
 	if (c == '\n')
