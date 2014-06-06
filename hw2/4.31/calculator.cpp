@@ -3,9 +3,9 @@
 #include <ctype.h>
 char token;
 
-int exp(void);
-int term(void);
-int factor(void);
+float exp(void);
+float term(void);
+float factor(void);
 
 void error(void)
 {
@@ -34,11 +34,10 @@ int main()
 	}
 	else
 		error();
-	system("pause");
 	return 0;
 }
 
-int exp(void)
+float exp(void)
 {
 	float temp = term();
 	while (token == '+' || token == '-')
@@ -58,7 +57,7 @@ int exp(void)
 	return temp;
 }
 
-int term(void)
+float term(void)
 {
 	float temp = factor();
 	while (token == '*')
@@ -69,7 +68,7 @@ int term(void)
 	return temp;
 }
 
-int factor(void)
+float factor(void)
 {
 	float temp;
 	if (token == '(')
@@ -81,7 +80,7 @@ int factor(void)
 	else if (isdigit(token))
 	{
 		ungetc(token, stdin);
-		scanf_s("%f", &temp);
+		scanf("%f", &temp);
 		token = getchar();
 	}
 	else
